@@ -171,6 +171,7 @@ public class SidbiApiController {
 		String status=null;
 		User users=null;
 		PredictionList pre=new PredictionList();
+		Applicant Prediction=new Applicant();
 		try {
 			Applicant app=new Applicant();
 	                                     
@@ -257,11 +258,20 @@ public class SidbiApiController {
 			}
 			LocalDate entdt=LocalDate.now();
 			app.setDataentdt(entdt);
+			try {
+				 Prediction=appRepo.findByApplicant_mobile_no(app.getApplicant_mobile_no(), entdt);}
+					catch(Exception e){
+					Prediction=null;	
+					}
+					
+					if (Prediction==null) {
+						response="Mobile number alredy exist. kindly provide new mobile number";
+					}else {
 			appRepo.save(app);
 			response="data has been submitted successfully";
 				System.out.println(response);
-				Applicant Prediction=appRepo.findByApplicant_mobile_no(app.getApplicant_mobile_no(), entdt);
-			//	PredictionList pre=new PredictionList();
+				
+				
 				pre.setApplicant_id(encdec.encryptnew(String.valueOf(Prediction.getApplicant_id())));
 				if(Prediction.getEstimated_income()==null) {
 					 pre=null;
@@ -279,7 +289,7 @@ public class SidbiApiController {
 				pre.setDataFetched(encdec.encryptnew(Prediction.getDataFetched()));
 				pre.setApplcnt_default_prob_number(encdec.encryptnew(Prediction.getApplcnt_default_prob_number()));
 				pre.setEstimated_income(encdec.encryptnew(String.valueOf(Prediction.getEstimated_income())));
-				pre.setSubmitted(encdec.encryptnew(Prediction.getSubmitted()));}
+				pre.setSubmitted(encdec.encryptnew(Prediction.getSubmitted()));}}
 			status="true";
 			httpstatus=HttpStatus.OK;
 			}
@@ -290,6 +300,7 @@ public class SidbiApiController {
 			status="false";
 			httpstatus=HttpStatus.BAD_REQUEST;
 		}
+		System.out.println(response);
 		return ResponseEntity.status(httpstatus).body(new PredictionResponse(pre,encdec.encryptnew(response),encdec.encryptnew(status)));
 	}
 	@PostMapping("/PushFiles")
